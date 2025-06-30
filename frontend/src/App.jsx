@@ -7,6 +7,8 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedSite, setSelectedSite] = useState('all');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [uniqueSites, setUniqueSites] = useState([]);
 
   useEffect(() => {
@@ -37,9 +39,17 @@ function App() {
     return <div>Error: {error.message}</div>;
   }
 
-  const filteredHistory = selectedSite === 'all'
-    ? history
-    : history.filter(entry => new URL(entry.url).origin === selectedSite);
+  const filteredHistory = history.filter(entry => {
+    const entryDate = new Date(entry.timestamp);
+    const start = startDate ? new Date(startDate) : null;
+    const end = endDate ? new Date(endDate) : null;
+
+    const matchesSite = selectedSite === 'all' || new URL(entry.url).origin === selectedSite;
+    const matchesStartDate = !start || entryDate >= start;
+    const matchesEndDate = !end || entryDate < new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1);
+
+    return matchesSite && matchesStartDate && matchesEndDate;
+  });
 
   return (
     <div className="App">
@@ -57,6 +67,14 @@ function App() {
             </option>
           ))}
         </select>
+      </div>
+      <div>
+        <label htmlFor="start-date">Start Date:</label>
+        <input type="date" id="start-date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+      </div>
+      <div>
+        <label htmlFor="end-date">End Date:</label>
+        <input type="date" id="end-date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
       </div>
       {filteredHistory.length === 0 ? (
         <p>No history found for the selected site.</p>
