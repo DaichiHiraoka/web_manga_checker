@@ -12,6 +12,10 @@ function App() {
   const [uniqueSites, setUniqueSites] = useState([]);
 
   useEffect(() => {
+    fetchHistory();
+  }, []);
+
+  const fetchHistory = () => {
     fetch('http://127.0.0.1:3000/api/history')
       .then(response => {
         if (!response.ok) {
@@ -29,7 +33,7 @@ function App() {
         setError(error);
         setLoading(false);
       });
-  }, []);
+  };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -50,6 +54,33 @@ function App() {
 
     return matchesSite && matchesStartDate && matchesEndDate;
   });
+
+  const handleDelete = async (id) => {
+    const numericId = Number(id); // Ensure id is a number
+    console.log('Attempting to delete history entry with ID:', numericId);
+    try {
+      const response = await fetch(`http://127.0.0.1:3000/api/history/${numericId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to delete history entry: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+      console.log('Deletion successful for ID:', numericId);
+      setHistory(prevHistory => {
+        const newHistory = prevHistory.filter(entry => {
+          console.log(`Comparing entry.id (${entry.id}) with numericId (${numericId})`);
+          return entry.id !== numericId;
+        });
+        console.log('Previous history:', prevHistory);
+        console.log('New history after filter:', newHistory);
+        return newHistory;
+      });
+    } catch (error) {
+      console.error('Error deleting history entry:', error);
+      setError(error);
+    }
+  };
 
   return (
     <div className="App">
@@ -85,6 +116,7 @@ function App() {
               <th>Title</th>
               <th>URL</th>
               <th>Timestamp</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -93,6 +125,9 @@ function App() {
                 <td>{entry.title}</td>
                 <td><a href={entry.url} target="_blank" rel="noopener noreferrer">{entry.url}</a></td>
                 <td>{new Date(entry.timestamp).toLocaleString()}</td>
+                <td>
+                  <button onClick={() => handleDelete(entry.id)}>Delete</button>
+                </td>
               </tr>
             ))}
           </tbody>

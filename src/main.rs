@@ -49,6 +49,7 @@ async fn main() {
         .route("/api/is_monitored", get(is_monitored))
         .route("/api/sites", get(get_sites).post(add_site)) // New endpoints for sites
         .route("/api/sites/:id", delete(delete_site))      // New endpoint for deleting a site
+        .route("/api/history/:id", delete(delete_history_entry)) // New endpoint for deleting a history entry
         .with_state(db_state)
         .layer(cors);
 
@@ -207,4 +208,23 @@ async fn log_entry(State(db): State<DbState>, Json(payload): Json<LogRequest>) {
         &[&payload.url, &payload.title, &Utc::now().to_rfc3339()],
     ).unwrap();
     println!("Logged: url={}, title={}", payload.url, payload.title);
+}
+
+async fn delete_history_entry(State(db): State<DbState>, Path(id): Path<i32>) -> impl IntoResponse {
+    println!("Attempting to delete history entry with ID: {}", id);
+    let conn = db.lock().unwrap();
+    match conn.execute("DELETE FROM history WHERE id = ?", [id]) {
+        Ok(rows_affected) if rows_affected > 0 => {
+            println!("Successfully deleted history entry with ID: {}", id);
+            (StatusCode::OK, "History entry deleted successfully".to_string())
+        },
+        Ok(_) => {
+            println!("History entry with ID: {} not found", id);
+            (StatusCode::NOT_FOUND, "History entry not found".to_string())
+        },
+        Err(e) => {
+            eprintln!("Failed to delete history entry with ID: {}. Error: {}", id, e);
+            (StatusCode::INTERNAL_SERVER_ERROR, format!("Failed to delete history entry: {}", e))
+        },
+    }
 }

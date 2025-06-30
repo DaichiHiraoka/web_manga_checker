@@ -1,0 +1,24 @@
+## 非同期UI更新の問題解決までの流れ
+
+### 問題の概要
+履歴の削除ボタンを押しても、画面が自動的に更新されず、手動でリロードしないと変更が反映されない問題が発生しました。バックエンドでの削除処理は成功していました。
+
+### 解決までのステップ
+
+1.  **最初の試み: `setHistory` による直接的なステート更新**
+    - **目的:** 削除成功後、`fetchHistory()` を呼び出して履歴全体を再フェッチするのではなく、`setHistory` を使用してフロントエンドの `history` ステートから直接該当エントリを削除することで、非同期更新を実現しようとしました。
+    - **変更内容:** `frontend/src/App.jsx` の `handleDelete` 関数内で、`fetchHistory()` の代わりに `setHistory(prevHistory => prevHistory.filter(entry => entry.id !== id))` を使用しました。
+    - **結果:** 削除ボタンを押しても画面が更新されませんでした。コンソールを確認すると、`ReferenceError: setHistory is not defined` および `ReferenceError: setError is not defined` というエラーが発生していました。
+
+2.  **エラーの原因特定と修正: スコープの問題**
+    - **原因:** `setHistory` と `setError` が `handleDelete` 関数からアクセスできないスコープにありました。これは、`handleDelete` 関数が `App` コンポーネントの `return` ステートメントの後に定義されていたためです。
+    - **変更内容:** `handleDelete` 関数を `App` コンポーネントの内部、`return` ステートメントの直前に移動しました。
+    - **結果:** `ReferenceError` は解消されましたが、新たに `[plugin:vite:react-babel] Identifier 'filteredHistory' has already been declared` というエラーが発生しました。
+
+3.  **エラーの原因特定と修正: 重複する変数宣言**
+    - **原因:** `handleDelete` 関数を移動した際に、`filteredHistory` 変数の宣言が `App.jsx` 内で二重になっていました。
+    - **変更内容:** 重複していた `filteredHistory` の宣言（58行目から始まる部分）を削除しました。
+    - **結果:** エラーが解消され、削除ボタンを押すと履歴が非同期で画面に反映されるようになりました。
+
+### 結論
+非同期UI更新の問題は、主にJavaScriptのスコープの問題と、それに続くコードの重複宣言によって引き起こされていました。`handleDelete` 関数を適切なスコープに配置し、重複する変数宣言を解消することで、期待通りの非同期更新が実現されました。
