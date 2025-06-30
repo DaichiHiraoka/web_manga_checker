@@ -10,6 +10,16 @@ The repository uses the following branches:
 -   `development[version]`: (e.g., `development0.1.0`) A branch for integrating features for a specific release version.
 -   `feature/[issue-number]-[short-description]`: (e.g., `feature/123-add-filtering`) Branches for developing new features.
 
+## Issue Management
+
+All new features and significant changes must begin with the creation of a GitHub issue.  
+Feature branches may only be created after the corresponding issue has been registered and described in the issue tracker.
+
+0.  **Create an Issue:**
+    -   Any new feature or significant change must start with creating a new issue in the GitHub issue tracker.
+    -   The issue should describe the purpose and requirements of the feature.
+
+
 ## Feature Implementation Workflow
 
 When implementing a new feature, the following steps must be strictly followed:
