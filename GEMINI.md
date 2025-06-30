@@ -19,6 +19,16 @@ Feature branches may only be created after the corresponding issue has been regi
     -   The issue should describe the purpose and requirements of the feature.
 
 
+## Issue Management
+
+All new features and significant changes must begin with the creation of a GitHub issue.  
+Feature branches may only be created after the corresponding issue has been registered and described in the issue tracker.
+
+0.  **Create an Issue:**
+    -   Any new feature or significant change must start with creating a new issue in the GitHub issue tracker.
+    -   The issue should describe the purpose and requirements of the feature.
+
+
 ## Feature Implementation Workflow
 
 When implementing a new feature, the following steps must be strictly followed:
