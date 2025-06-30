@@ -1,0 +1,16 @@
+{
+    "manifest_version": 3,
+    "name": "Web Manga Checker",
+    "version": "0.1.0",
+    "description": "Logs viewed web manga.",
+    "permissions": [
+        "tabs",
+        "scripting"
+    ],
+    "host_permissions": [
+        "<all_urls>"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    }
+}
